@@ -1,0 +1,152 @@
+Q.1. Access the dataset frets given in library boot. Data consist of measurements of the
+length and breadth of the heads of pairs of adult brothers in 25 randomly sampled
+families. Compute the maximum likelihood estimator of mean vector and dispersion
+matrix.
+
+>library(boot)
+> frets
+>apply(frets,2,mean)
+    l1     b1     l2     b2 
+185.72 151.12 183.84 149.24
+> X1=t(frets)
+> I1=diag(25)
+> E1=matrix(1, nrow=25)
+> S1=X1%*%(I1-E1%*%t(E1)/25)%*%t(X1)
+> Sig1=S1/25
+> Sig1
+                 l1            b1               l2          b2
+l1 91.4816   50.7536   66.8752   44.2672
+b1 50.7536  52.1856   49.2592 33.6512
+l2 66.8752 49.2592 96.7744 54.2784
+b2 44.2672 33.6512 54.2784 43.2224
+
+
+Q.2. Access the dataset iris. Data gives measurements of 4 variables (viz. sepal length
+and width and petal length and width), for 50 flowers from each of the 3 species of
+iris. Compute an unbiased estimator of the mean vector and the variance-covariance
+matrix.
+>colnames(iris)
+[1] "Sepal.Length" "Sepal.Width"  "Petal.Length" "Petal.Width"  "Species"
+>apply(iris[,-5],2,mean)
+Sepal.Length  Sepal.Width Petal.Length  Petal.Width 
+    5.843333     3.057333     3.758000     1.199333
+> X2=t(iris[,-5])
+> I2=diag(150)
+> E2=matrix(1,nrow=150)
+> S2=X2%*%(I2-E2%*%t(E2)/150)%*%t(X2)
+> Sig2=S2/150
+> Sig2
+Sepal.Length     Sepal.Width     Petal.Length      Petal.Width
+Sepal.Length   0.68112222     -0.04215111    1.2658200          0.5128289
+Sepal.Width   -0.04215111       0.18871289   -0.3274587        -0.1208284
+Petal.Length   1.26582000      -0.32745867    3.0955027          1.2869720
+Petal.Width    0.51282889       -0.12082844    1.2869720          0.5771329
+
+
+
+Q.3. Check whether the estimates of dispersion matrices, obtained in Q.1 and Q.2 are
+non-negative definite
+
+(a) By computing all the leading principal minors
+
+Sig1:
+> m1=c()
+>m1[1]=Sig1[1,1]
+>for(i in 2:3)
++ {
++ m1[i]=det(Sig1[1:i 1:i])
++ }
+>which(m1<0)
+integer(0)
+
+Sig2:
+> m2=c()
+>m2[1]=Sig1[1,1]
+>for(i in 2:3)
++ {
++ m2[i]=det(Sig2[1:i,1:i])
++ }
+>which(m2<0)
+integer(0)
+
+
+(b) By computing all the eigenvalues
+
+Sig1:
+>which(eigen(Sig1)$values<0)
+integer(0)
+
+
+Sig2:
+>which(eigen(Sig2)$values<0)
+integer(0)
+
+
+
+
+
+
+
+
+
+
+Q.4. Construct the correlation matrices from the variance covariance matrices obtained in
+Q.1 and Q.2 using each of the following three methods:
+(a) Using the formula rij=σ_ij/(√(σ_ii ) √(σ_(jj ) ))
+
+Sig1:
+> r1=matrix(nrow=4,ncol=4)
+>for(j in 1:4)
++ {
++ for(i in 1:4)
++ {
++ r1[i,j]=(Sig1[i,j])/sqrt(Sig1[i,i]*Sig1[j,j])
++ }
++ }
+> r1
+          [,1]      [,2]      [,3]      [,4]
+[1,] 1.0000000 0.7345555 0.7107518 0.7039807
+[2,] 0.7345555 1.0000000 0.6931573 0.7085504
+[3,] 0.7107518 0.6931573 1.0000000 0.8392519
+[4,] 0.7039807 0.7085504 0.8392519 1.0000000
+
+Sig2:
+> r2=matrix(nrow=4,ncol=4)
+>for(j in 1:4)
++ {
++ for(i in 1:4)
++ {
++ r2[i,j]=(Sig2[i,j])/sqrt(Sig2[i,i]*Sig2[j,j])
++ }
++ }
+> r2
+           [,1]       [,2]       [,3]       [,4]
+[1,]  1.0000000 -0.1175698  0.8717538  0.8179411
+[2,] -0.1175698  1.0000000 -0.4284401 -0.3661259
+[3,]  0.8717538 -0.4284401  1.0000000  0.9628654
+[4,]  0.8179411 -0.3661259  0.9628654  1.0000000
+
+
+(b) By constructing a diagonal matrix D, where Dii= σii
+
+
+
+
+(c) Using the conversion command available in R.
+Sig1
+>cov2cor(Sig1)
+          l1      b1        l2        b2
+l1 1.0000000   0.7345555  0.7107518   0.7039807
+b1 0.7345555  1.0000000   0.6931573   0.7085504
+l20.7107518   0.6931573  1.0000000   0.8392519
+b2 0.7039807   0.7085504   0.8392519   1.0000000
+
+Sig2
+>cov2cor(Sig2)
+ Sepal.Length Sepal.Width Petal.Length Petal.Width
+Sepal.Length    1.0000000      -0.1175698    0.8717538        0.8179411
+Sepal.Width    -0.1175698        1.0000000   -0.4284401       -0.3661259
+Petal.Length    0.8717538       -0.4284401    1.0000000        0.9628654
+Petal.Width     0.8179411       -0.3661259    0.9628654        1.0000000
+
+
